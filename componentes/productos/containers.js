@@ -1,23 +1,26 @@
-const fs = require('file-system');
+const fs = require('fs');
 
-class ContarinerProductos{
+class Container{
     static ID = 0;
-    static productos = [];
-
-    constructor(archivoProducto){
-        this.archivoProducto = archivoProducto;
-    };
-
-    productoNuevo = new ContarinerProductos('productos.txt');
-
+    static productos = [
+        {
+            nombre: String,
+            descripcion: String,
+            codigo: String,
+            foto: String,
+            precio: Number,
+            stock: Number,
+            timeStamp: Date.now(),
+        }
+    ];
 
     static generarID(item){
-        return item.id = ++ContarinerProductos.ID;
+        return  item.id = ++Container.ID;
     };
-    
+
     static writeProducts = async (producto) =>{
         try {
-            return await fs.promises.writeFile(this.archivoProducto, JSON.stringify(producto));
+            return await fs.promises.writeFile('productos.txt', JSON.stringify(producto));
         } catch (error) {
             console.error('[ERROR==]', error)
         };
@@ -25,36 +28,61 @@ class ContarinerProductos{
     
     static readAllProducst = async () => {
         try{
-            const content = await fs.promises.readFile('productos.txt', 'utf-8');
-            return JSON.parse(content);
+          const content = await fs.promises.readFile('productos.txt', 'utf-8');
+          return JSON.parse(content);
         }catch(err){
-            console.error('[READ ERROR]',err);
+          console.error('[READ ERROR]',err);
         };
     };
-    
-    static obtenerProductos = async () =>{
+
+    async guardar(nuevoElemento){
         try {
-            const result = ContarinerProductos.readAllProducst();
-            return result;    
-        } catch (error) {
-            console.log('[ERROR AL OBTENER TODOS LOS PRODUCTOS]', error);
-        };
-    }
-    
-    async crearProducto(producto){ 
-        try {
-            const id = ++ContarinerProductos.ID;
-            const listaProductos = ContarinerProductos.productos;
+            const id = ++Container.ID;
+            const ListaProductos = Container.productos
             nuevoElemento.id = id;
-            listaProductos.push(nuevoElemento);
-            ContarinerProductos.writeProducts(listaProductos);
-            const result = ContarinerProductos.readAllProducst();
+            ListaProductos.push(nuevoElemento);
+            await Container.writeProducts(ListaProductos);
+            const productos = await Container.readAllProducst();
             return nuevoElemento.id;
         } catch (error) {
-            console.log('[ERROR AL CREAR PRODUCTOS]')
-        }
-
+            console.log('[ERROR AL GUARDAR]', error);
+        };
     };
-}
 
-module.exports = ContarinerProductos;
+    async getAll(){
+        try {
+            return await Container.readAllProducst();
+        } catch (error) {
+            console.log('[ERROR AL LISTAR LOS PRODUCTOS]', error);
+        };
+    };
+
+    async getAllById(id){
+        try {
+            const productos = await Container.readAllProducst();
+            if(Array.isArray(productos)){
+                const result = productos.find(i => i.id == id)
+                return result;
+            }
+        } catch (error) {
+            console.log('[ERROR AL BUSCAR POR ID]', error);
+        };
+    };
+
+    async delete(id){
+        try {
+            const productos = await readAllProducst();
+            if(Array.isArray(productos) && typeof id == 'number'){
+                const listaProductosActualizada = productos.filter(i => i.id !== id)
+                await writeProducts(listaProductosActualizada);
+                return listaProductosActualizada;
+            };
+        } catch (error) {
+            console.log('[ERROR AL BORRAR EL PRODUCTO]', error);
+        };
+    };
+
+
+};
+
+module.exports = Container

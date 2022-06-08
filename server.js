@@ -1,16 +1,18 @@
 const express = require('express');
-const app = express();
-const server = require('http').Server(app);
+const router = require('../CODERHOUSE - BACKEND - NODEJS - PROYECTO FINAL/componentes/productos/network');
 const bodyParser = require('body-parser');
-const routes = require('./network/routes');
-const PORT = process.env.PORT || 8080;
 
+const app = express();
+
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
 
-routes(app);
-app.use('/api', express.static('public'));
-
-server.listen(PORT, () =>{
-    console.log(`Ejecutando en el puerto http://localhost:${PORT}`);
+app.get('/', (req, res) =>{
+  res.sendFile(__dirname + '/public/index.html')
 });
+
+app.use('/api', router);
+
+app.listen(8080, () =>{
+    console.log('Corriendo en el Puerto 8080')
+})

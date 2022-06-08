@@ -1,9 +1,0 @@
-[{
-    "timeStamp": "545456",
-    "nombre": "papa",
-    "descripcion": "mensaje",
-    "codigo": "123456",
-    "foto": "esto es una foto",
-    "precio": 123,
-    "stock": 10
-}]
