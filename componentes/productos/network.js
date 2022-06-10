@@ -2,33 +2,51 @@ const express = require('express');
 const router = express.Router();
 const Container = require('../productos/containers');
 
-const productos = new Container('productos.txt');
 
-router.get('/productos', async (req, res) =>{
+const middlewareAutenticacion = (req,res,next) => {
+    req.user = {
+        fullName: "Jose Alvarez",
+        isAdmin: false
+    };
+    next();
+};
+
+const middlewareAutorizacion = (req, res, next) => {
+    if (req.user.isAdmin) {
+        next();
+    } else {
+        res.status(404).send("Usuario no autorizado");
+    };
+};
+
+
+const productos = new Container('./productos.txt'); 
+
+router.get('/productos', middlewareAutenticacion, async (req, res) =>{
     try {
         const items = await productos.getAll();
         if(Array.isArray(items)){
-            res.send({items}).status(200);
+            res.send({productos: items}).status(200);
         };
     } catch (error) {
         console.log('[ERROR EN EL ROUTER GET]', error)
     };
 });
 
-router.get('/productos/:id', async (req, res) =>{
+router.get('/productos/:id', middlewareAutenticacion, async (req, res) =>{
     const id = req.params.id
     try {
         const items = await productos.getAll();
         if(Array.isArray(items)){
             const item = items.find(i => i.id == id);
-            res.json({productos: item})
+            res.json({producto: item})
         };
     } catch (error) {
         console.log('[ERROR AL BUSCAR POR ID]', error)
     };
 });
 
-router.post('/productos', async (req, res) =>{
+router.post('/productos', middlewareAutenticacion, middlewareAutorizacion, async (req, res) =>{
     try {
         const nuevoProducto = req.body;
         const productoId = await productos.guardar(nuevoProducto);
@@ -38,7 +56,7 @@ router.post('/productos', async (req, res) =>{
     };
 });
 
-router.put('/productos/:id', async (req, res) =>{
+router.put('/productos/:id', middlewareAutenticacion, middlewareAutorizacion, async (req, res) =>{
     try {
         const id = req.params.id
         const productoEditado = req.body;
@@ -55,20 +73,20 @@ router.put('/productos/:id', async (req, res) =>{
         })
         await Container.writeProducts(listaProductos);
         const productoId = await Container.readAllProducst();
-        res.send({items: listaProductos}).status(200);
+        res.send({producto: listaProductos}).status(200);
     } catch (error) {
         console.log('[ERROR AL EDITAR PRODUCTO]', error);
     };
 });
 
-router.delete('/productos/:id', async (req, res, next) =>{
+router.delete('/productos/:id', middlewareAutenticacion, middlewareAutorizacion, async (req, res, next) =>{
     try {
         const id = req.params.id
         const data = await productos.getAll()
         const productList = data.filter(element => element.id != id)
         await Container.writeProducts(productList)
         console.log(productList)
-        res.send({items: productList}).status(200);
+        res.send({productos: productList}).status(200);
     } catch (error) {
         console.log('[ERROR AL ELIMINAR PRODUCTO', error);
     };

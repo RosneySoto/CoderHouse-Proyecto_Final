@@ -1,5 +1,6 @@
 const express = require('express');
 const router = require('../CODERHOUSE - BACKEND - NODEJS - PROYECTO FINAL/componentes/productos/network');
+const routerCarrito = require('../CODERHOUSE - BACKEND - NODEJS - PROYECTO FINAL/componentes/carrito/network');
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -12,6 +13,7 @@ app.get('/', (req, res) =>{
 });
 
 app.use('/api', router);
+app.use('/api', routerCarrito);
 
 app.listen(8080, () =>{
     console.log('Corriendo en el Puerto 8080')

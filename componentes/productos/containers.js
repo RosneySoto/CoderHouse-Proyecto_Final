@@ -1,18 +1,14 @@
 const fs = require('fs');
 
 class Container{
+    
+    constructor(archivo){
+        this.archivo = archivo;
+    };
+
     static ID = 0;
-    static productos = [
-        {
-            nombre: String,
-            descripcion: String,
-            codigo: String,
-            foto: String,
-            precio: Number,
-            stock: Number,
-            timeStamp: Date.now(),
-        }
-    ];
+    static timestamp = Date.now();
+    static productos = []
 
     static generarID(item){
         return  item.id = ++Container.ID;
@@ -28,7 +24,7 @@ class Container{
     
     static readAllProducst = async () => {
         try{
-          const content = await fs.promises.readFile('productos.txt', 'utf-8');
+          let content = await fs.promises.readFile('productos.txt', 'utf-8');
           return JSON.parse(content);
         }catch(err){
           console.error('[READ ERROR]',err);
@@ -40,6 +36,7 @@ class Container{
             const id = ++Container.ID;
             const ListaProductos = Container.productos
             nuevoElemento.id = id;
+            nuevoElemento.timestamp = Container.timestamp;
             ListaProductos.push(nuevoElemento);
             await Container.writeProducts(ListaProductos);
             const productos = await Container.readAllProducst();

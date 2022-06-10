@@ -21,7 +21,7 @@ router.get('/carrito/:id', async (req, res) =>{
         const items = await carritos.getAllCarritos();
         if(Array.isArray(items)){
             const item = items.find(i => i.id == id);
-            res.json({carritos: item})
+            res.json({item})
         };
     } catch (error) {
         console.log('[ERROR AL BUSCAR POR ID]', error)
@@ -30,34 +30,21 @@ router.get('/carrito/:id', async (req, res) =>{
 
 router.post('/carrito', async (req, res) =>{
     try {
-        const nuevoCarrito = req.body;
-        const carritoId = await carritos.guardarCarrito(nuevoCarrito);
-        res.send({carritos: nuevoCarrito}).status(201);
+        const newCarrito = await carritos.crearCarrito();
+        res.send({id: newCarrito}).status(201);
     } catch (error) {
         console.log('[ERROR AL CREAR EL CARRITO]', error);
     };
 });
 
-router.put('/carrito/:id', async (req, res) =>{
+router.post('/carrito/:id/productos', async (req, res) =>{
     try {
         const id = req.params.id
-        const carritoEditado = req.body;
-        const data = await carritos.getAllCarritos();
-        const listaCarritos = data.map(i =>{
-            if(parseFloat(i.id) === parseFloat(id)){
-                return {
-                    id: i.id,
-                    ...carritoEditado
-                }
-            }else{
-                return i
-            };
-        })
-        await ContainerCarrito.writeCarrito(listaCarritos);
-        const carritoId = await ContainerCarrito.readAllCarritos();
-        res.send({items: listaCarritos}).status(200);
+        const productos = req.body;
+        const newCarrito = await carritos.updateById(id, productos);
+        res.send({id: newCarrito}).status(201);
     } catch (error) {
-        console.log('[ERROR AL EDITAR EL CARRITO]', error);
+        console.log('[ERROR AL CREAR EL CARRITO]', error);
     };
 });
 
@@ -72,5 +59,17 @@ router.delete('/carrito/:id', async (req, res, next) =>{
         console.log('[ERROR AL ELIMINAR EL CARRITO', error);
     };
 });
+
+router.delete('/carrito/:id/productos/id_prod', async (req, res, next) =>{
+    try {
+        const id = req.params.id
+        const prodId = req.params.id_prod;  
+        await carritos.deleteProdById(id, prodId);
+        res.send({items: carritos}).status(200);
+    } catch (error) {
+        console.log('[ERROR AL ELIMINAR EL CARRITO', error);
+    };
+});
+
 
 module.exports = router;
